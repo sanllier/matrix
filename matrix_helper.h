@@ -44,6 +44,13 @@ public:
             for ( long q = 0; q < width; ++q )
                 matr.at( i, q ) = (T)rand();
     }
+
+    static void makeIdentity( matrix<T>& matr )
+    {
+        const long size = matr.height() < matr.width() ? matr.height() : matr.width();
+        for ( long i = 0; i < size; ++i )
+            matr.at( i, i ) = T(1);
+    }
 };
 
 //--------------------------------------------------------------

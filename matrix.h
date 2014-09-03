@@ -108,8 +108,9 @@ public:
 		if ( m_data )
 			m_data.reset();
 
-		m_height = mat.height();
-		m_width  = mat.width();
+		m_height = mat.m_height;
+		m_width  = mat.m_width;
+        m_dataWidth = mat.m_dataType;
 		m_data   = mat.m_data;
 		m_pivot  = mat.m_pivot;
 	}
@@ -118,8 +119,9 @@ public:
 		if ( m_data )
 			m_data.reset();
 
-		m_height = mat.height();
-		m_width  = mat.width();
+		m_height = mat.m_height;
+		m_width  = mat.m_width;
+        m_dataWidth = mat.m_width;
 		m_pivot.row = 0;
         m_pivot.col = 0;
 		m_data.reset( new T[ m_height * m_width ] );
