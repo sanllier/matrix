@@ -80,8 +80,8 @@ public:
 		}
 	}
 	matrix( const matrix& mat )
-		: m_height( mat.m_height )
-		, m_width( mat.m_width )
+		: m_height( mat.height() )
+		, m_width( mat.width() )
         , m_dataWidth( mat.m_dataWidth )
 		, m_buf(0)
 		, m_bufSize(0)
@@ -107,18 +107,18 @@ public:
 		if ( m_data )
 			m_data.reset();
 
-		m_height = mat.m_height;
-		m_width  = mat.m_width;
-		m_data = mat.m_data;
-		m_pivot = mat.m_pivot;
+		m_height = mat.height();
+		m_width  = mat.width();
+		m_data   = mat.m_data;
+		m_pivot  = mat.m_pivot;
 	}
 	void strongCopy( const matrix& mat )
 	{
 		if ( m_data )
 			m_data.reset();
 
-		m_height = mat.m_height;
-		m_width  = mat.m_width;
+		m_height = mat.height();
+		m_width  = mat.width();
 		m_pivot.row = 0;
         m_pivot.col = 0;
 		m_data.reset( new T[ m_height * m_width ] );
@@ -140,20 +140,20 @@ public:
 	}
 
 	//---------------------- ACCESS -----------------------
-	T& at( long row, long col )
+	inline T& at( long row, long col )
 	{
-		if ( row >= m_height )
+		if ( row >= height() )
 			throw std::out_of_range( "matrix row out of range" );
-		else if ( col >= m_width )
+		else if ( col >= width() )
 			throw std::out_of_range( "matrix column out of range" );
 
 		return m_data.get()[ ( row + m_pivot.row ) * m_dataWidth + ( col + m_pivot.col ) ];
 	}
-    const T& at( long row, long col ) const
+    inline const T& at( long row, long col ) const
 	{
-		if ( row >= m_height )
+		if ( row >= height() )
 			throw std::out_of_range( "matrix row out of range" );
-		else if ( col >= m_width )
+		else if ( col >= width() )
 			throw std::out_of_range( "matrix column out of range" );
 
 		return m_data.get()[ ( row + m_pivot.row ) * m_dataWidth + ( col + m_pivot.col ) ];
@@ -162,13 +162,13 @@ public:
     inline long width()  const { return m_width; }
     inline EDataType dataType() const { return m_dataType; }
     inline EMatrixType matrixType() const { return m_matrixType; }
-    const void* raw() const { return m_data; } 
+    inline const void* raw() const { return m_data; } 
 
     //-----------------------------------------------------
     const matrix<T> submatrix( long row, long col, long height, long width ) const
     {
         static matrix<T> dummy;
-        if ( row + height > m_height || col + width > m_width )
+        if ( row + height > height() || col + width > width() )
             return dummy;
 
         matrix<T> matr;
@@ -298,6 +298,42 @@ public:
 			m_pos = 0;
 		}
 	}
+
+    //------------------- OPERATIONS --------------------
+    matrix<T>& add( const matrix<T>& matr )
+    {
+        const long height = height();
+        const long width  = width();
+
+        if ( height != matr.height() || width != matr.width() )
+            return *this;
+
+        for ( long i = 0; i < height; ++i )
+            for ( long q = 0; q < width; ++q )
+                at( i, q ) += matr.at( i, q );
+
+        return *this;
+    }
+    matrix<T> mul( const matrix<T>& matr )
+    {
+        const long height = height();
+        const long width  = width();
+        if ( width != matr.height() )
+            return *this;
+
+        T acc = T();
+        for ( long i = 0; i < height; ++i )
+        {
+            for ( long q = 0; q < matr.height(); ++q )
+            {
+                for ( long k = 0; k < width; ++k )
+                {
+                    
+                }
+            }
+        }
+        return *this;
+    }
 
 private:
 	EDataType getType() { return UNDEFINED_DATA_TYPE; }
