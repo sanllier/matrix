@@ -78,6 +78,7 @@ public:
 			m_height = 0;
 			m_width  = 0;
 		}
+        clear();
 	}
 	matrix( const matrix& mat )
 		: m_height( mat.height() )
@@ -168,7 +169,7 @@ public:
     const matrix<T> submatrix( long row, long col, long height, long width ) const
     {
         static matrix<T> dummy;
-        if ( row + height > height() || col + width > width() )
+        if ( row + height > this->height() || col + width > this->width() )
             return dummy;
 
         matrix<T> matr;
@@ -181,6 +182,10 @@ public:
         matr.m_pivot.row = row;
         matr.m_pivot.col = col;
         return matr;
+    }
+    void clear()
+    {
+        std::memset( m_data.get(), 0, m_height * m_width * sizeof(T) );
     }
 
 	//------------------- SERIALIZATION -------------------
@@ -299,11 +304,11 @@ public:
 		}
 	}
 
-    //------------------- OPERATIONS --------------------
+    //-------------------- OPERATIONS ---------------------
     matrix<T>& add( const matrix<T>& matr )
     {
-        const long height = height();
-        const long width  = width();
+        const long height = this->height();
+        const long width  = this->width();
 
         if ( height != matr.height() || width != matr.width() )
             return *this;
@@ -314,22 +319,31 @@ public:
 
         return *this;
     }
-    matrix<T> mul( const matrix<T>& matr )
+    matrix<T>& mul( const matrix<T>& matr )
     {
-        const long height = height();
-        const long width  = width();
+        const long height = this->height();
+        const long width  = this->width();
         if ( width != matr.height() )
             return *this;
+
+        matrix<T> temp;
+        temp.strongCopy( *this );
+        m_data.reset( new T[ height * matr.width() ] );
+        m_height = height;
+        m_width  = matr.width();
+        m_dataWidth = m_width;
 
         T acc = T();
         for ( long i = 0; i < height; ++i )
         {
-            for ( long q = 0; q < matr.height(); ++q )
+            for ( long q = 0; q < matr.width(); ++q )
             {
                 for ( long k = 0; k < width; ++k )
                 {
-                    
+                    acc += temp.at( i, k ) * matr.at( k, q );
                 }
+                at( i, q ) = acc;
+                acc = T();
             }
         }
         return *this;
