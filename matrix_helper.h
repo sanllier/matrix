@@ -64,7 +64,26 @@ public:
 
     static void blockMul( matrix<T>& matrA, matrix<T>& matrB, long blockSize )
     {
-        // TODO
+        const long fullBHeightA = matrA.height() / blockSize;
+        const long fullBHeightB = matrB.height() / blockSize;
+        const long fullBWidthA  = matrA.width()  / blockSize;
+        const long fullBWidthB  = matrA.width()  / blockSize;
+
+        matrix<T> blockA( fullBHeightA, fullBWidthA );
+        matrix<T> blockB( fullBHeightB, fullBWidthB );
+
+        for ( long i = 0; i < matrA.height() / fullBHeightA; ++i )
+        {
+            for ( long q = 0; q < matrB.width() / fullBWidthB; ++q )
+            {
+                for ( long k = 0; k < matrA.width() / fullBWidthA; ++k )
+                {
+                    blockA.strongSubmatrix( matrA, i * fullBHeightA, k * fullBWidthA, fullBHeightA, fullBWidthA );
+                    blockB.weakSubmatrix( matrA, k * fullBHeightA, q * fullBWidthA, fullBHeightA, fullBWidthA );
+                }
+            }
+        }
+
     }
 };
 
