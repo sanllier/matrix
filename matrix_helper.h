@@ -2,6 +2,7 @@
 #define MATRIX_HELPER_H
 
 #include <ostream>
+#include <algorithm>
 
 #include "matrix.h"
 
@@ -46,6 +47,24 @@ public:
         const long size = matr.height() < matr.width() ? matr.height() : matr.width();
         for ( long i = 0; i < size; ++i )
             matr.at( i, i ) = T(1);
+    }
+
+    static void transpose( matrix<T>& matr )    // NOTE: lazy
+    {
+        const long height = matr.height();
+        const long width  = matr.width();
+
+        matrix<T> temp( matr.width(), matr.height() );
+        for ( long i = 0; i < height; ++i )
+            for ( long q = 0; q < width; ++q )
+                temp.at( q, i ) = matr.at( i, q );
+
+        matr.strongCopy( temp );
+    }
+
+    static void blockMul( matrix<T>& matrA, matrix<T>& matrB, long blockSize )
+    {
+        // TODO
     }
 };
 

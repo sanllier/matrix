@@ -7,7 +7,7 @@
 
 #ifdef _MSC_VER 
     #ifdef _WIN64
-        static const int ELEMENT_SIZE_BY_TYPE[] = { 0, 4, 8, 4, 8, 8, 8, 8, 16 };
+        static const int ELEMENT_SIZE_BY_TYPE[] = { 0, 4, 8, 4, 8, 8, 16, 8, 16 };
     #else
         static const int ELEMENT_SIZE_BY_TYPE[] = { 0, 4, 4, 4, 8, 8, 8, 8, 16 };
     #endif
@@ -15,7 +15,7 @@
 
 #ifdef __GNUC__
     #ifdef __x86_64__
-        static const int ELEMENT_SIZE_BY_TYPE[] = { 0, 4, 8, 4, 8, 8, 8, 8, 16 };
+        static const int ELEMENT_SIZE_BY_TYPE[] = { 0, 4, 8, 4, 8, 8, 16, 8, 16 };
     #else
         static const int ELEMENT_SIZE_BY_TYPE[] = { 0, 4, 4, 4, 8, 8, 8, 8, 16 };
     #endif
