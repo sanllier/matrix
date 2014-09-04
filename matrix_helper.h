@@ -1,4 +1,3 @@
-#pragma once
 #ifndef MATRIX_HELPER_H
 #define MATRIX_HELPER_H
 
@@ -13,9 +12,6 @@ template< class T >
 class matrix_helper
 {
 public:
-    matrix_helper() {}
-    ~matrix_helper() {}
-
     static void print( const matrix<T>& matr, std::ostream& oStr )
     {
         const long height = matr.height();
