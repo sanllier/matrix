@@ -152,7 +152,7 @@ public:
     inline EDataType dataType() const { return m_dataType; }
     inline void setMatrixType( EMatrixType type ) { m_matrixType = type; }
     inline EMatrixType matrixType() const { return m_matrixType; }
-    inline const void* raw() const { return m_data.get(); } 
+    inline void* raw() { return m_data.get(); } 
 
     //-----------------------------------------------------
     matrix<T>& strongSubmatrix( const matrix<T>& mat, long row, long col, long height, long width )

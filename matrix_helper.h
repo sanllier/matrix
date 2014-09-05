@@ -62,7 +62,8 @@ public:
         matr.strongCopy( temp );
     }
 
-    static void blockMul( matrix<T>& matrA, matrix<T>& matrB, long blockSize )
+	// CRAP
+    /*static void blockMul( matrix<T>& matrA, matrix<T>& matrB, long blockSize )
     {
         const long fullBHeightA = matrA.height() / blockSize;
         const long fullBHeightB = matrB.height() / blockSize;
@@ -84,7 +85,7 @@ public:
             }
         }
 
-    }
+    }*/
 };
 
 //--------------------------------------------------------------

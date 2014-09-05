@@ -3,6 +3,8 @@
 
 #include "matrix.h"
 
+#include <fstream>
+
 //-------------------------------------------------------------
 
 #ifdef _MSC_VER 
@@ -136,7 +138,8 @@ public:
 		if ( data )
 		{
             size_t temp = m_bufSize > m_dataSize - m_pos ? m_dataSize - m_pos : m_bufSize;
-			std::memcpy( (char*)mat.raw() + m_pos, (char*)data + m_pos, temp );
+			std::memcpy( (char*)mat.raw() + m_pos, data, temp );
+
 			m_pos += temp;
 			dataSize = temp;
 		}
@@ -152,12 +155,152 @@ public:
 			m_pos = 0;
 		}
 	}
-    
+
+    //--------------------- HELPERS -----------------------
+	template< class T >
+	bool writeBinary( const char* fileName, matrix<T>& matr )
+	{
+		static const size_t BUF_SIZE = sizeof( SHeader ); // CRAP?
+
+		if ( !fileName || !fileName[0] )
+			return false;
+
+		std::ofstream oFstr( fileName );
+		if ( !oFstr.good() )
+			return false;
+
+		seriaizeStart( matr, BUF_SIZE );
+		size_t size = 0;
+		const void* buf = 0;
+		do
+		{			
+			buf = serializeStep( size, matr );
+			oFstr.write( (const char*)buf, size );
+		} while( size );
+		serializeStop();
+
+		oFstr.close();
+		return true;
+	}
+
+	void* readBinary( const char* fileName, SHeader& header )
+	{
+		static const size_t BUF_SIZE = sizeof( SHeader ); // CRAP?
+
+		if ( !fileName || !fileName[0] )
+			return 0;
+
+		std::ifstream iFstr( fileName );
+		if ( !iFstr.good() )
+			return 0;
+
+		iFstr.seekg (0, iFstr.end);
+		size_t length = (size_t)iFstr.tellg();
+		iFstr.seekg (0, iFstr.beg);
+		if ( length < sizeof( SHeader ) )
+			return 0;
+
+		char* buf = new char[ BUF_SIZE ];
+		if ( !buf )
+			return 0;
+
+		auto onExit = [ buf, this ]( std::ifstream& iFstr ){ delete[] buf; iFstr.close(); deserializeStop(); };
+
+		iFstr.read( buf, BUF_SIZE );
+		length -= BUF_SIZE;
+		header = deserializeStart( BUF_SIZE, buf );
+		switch ( header.dataType )
+		{
+		case INT:
+			m_undefMatr = new matrix<int>( header.height, header.width );
+			break;
+		case LONG:
+			m_undefMatr = new matrix<long>( header.height, header.width );
+			break;
+		case FLOAT:
+			m_undefMatr = new matrix<float>( header.height, header.width );
+			break;
+		case DOUBLE:
+			m_undefMatr = new matrix<double>( header.height, header.width );
+			break;
+		case COMPLEX_INT:
+			m_undefMatr = new matrix< std::complex<int> >( header.height, header.width );
+			break;
+		case COMPLEX_LONG:
+			m_undefMatr = new matrix< std::complex<long> >( header.height, header.width );
+			break;
+		case COMPLEX_FLOAT:
+			m_undefMatr = new matrix< std::complex<float> >( header.height, header.width );
+			break;
+		case COMPLEX_DOUBLE:
+			m_undefMatr = new matrix< std::complex<double> >( header.height, header.width );
+			break;
+		case UNDEFINED_DATA_TYPE:
+			onExit( iFstr );
+			return 0;
+		default:
+			onExit( iFstr );
+			return 0;
+		}
+
+		size_t size = 0;
+		do
+		{
+			size = BUF_SIZE > length ? length : BUF_SIZE;
+			iFstr.read( buf, size );
+			length -= BUF_SIZE;
+
+			switch ( header.dataType )
+			{
+			case INT:
+				deserializeStep( buf, size, *( (matrix<int>*)m_undefMatr ) ); 
+				break;
+			case LONG:
+				deserializeStep( buf, size, *( (matrix<long>*)m_undefMatr ) ); 
+				break;
+			case FLOAT:
+				deserializeStep( buf, size, *( (matrix<float>*)m_undefMatr ) ); 
+				break;
+			case DOUBLE:
+				deserializeStep( buf, size, *( (matrix<double>*)m_undefMatr ) ); 
+				break;
+			case COMPLEX_INT:
+				deserializeStep( buf, size, *( (matrix< std::complex<int> >*)m_undefMatr ) ); 
+				break;
+			case COMPLEX_LONG:
+				deserializeStep( buf, size, *( (matrix< std::complex<long> >*)m_undefMatr ) ); 
+				break;
+			case COMPLEX_FLOAT:
+				deserializeStep( buf, size, *( (matrix< std::complex<float> >*)m_undefMatr ) ); 
+				break;
+			case COMPLEX_DOUBLE:
+				deserializeStep( buf, size, *( (matrix< std::complex<double> >*)m_undefMatr ) ); 
+				break;
+			case UNDEFINED_DATA_TYPE:
+				delete m_undefMatr;
+				m_undefMatr = 0;
+				onExit( iFstr );
+				return 0;				
+			default:
+				delete m_undefMatr;
+				m_undefMatr = 0;
+				onExit( iFstr );
+				return 0;	
+			}
+		} while( size );
+		deserializeStop();
+
+		onExit( iFstr );
+		return m_undefMatr;
+	}
+
 private:
     char* m_buf;
     size_t m_bufSize;
     size_t m_dataSize;
     size_t m_pos;
+
+	void* m_undefMatr;
 };
 
 //--------------------------------------------------------------
