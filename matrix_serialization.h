@@ -28,18 +28,19 @@
 namespace Matrix {
 //--------------------------------------------------------------
 
+#pragma pack(1)
+struct SHeader
+{
+    long height;
+	long width;
+	EDataType   dataType;
+	EMatrixType matrixType;
+};
+
+//--------------------------------------------------------------
+
 class matrix_serialization
 {
-public:
-    #pragma pack(1)
-    struct SHeader
-    {
-        long height;
-	    long width;
-	    EDataType   dataType;
-	    EMatrixType matrixType;
-    };
-
 public:
     matrix_serialization():m_buf(0), m_bufSize(0), m_dataSize(0), m_pos(0) {}
     ~matrix_serialization()
@@ -205,6 +206,7 @@ public:
 			return 0;
 
 		auto onExit = [ buf, this ]( std::ifstream& iFstr ){ delete[] buf; iFstr.close(); deserializeStop(); };
+		void* undefMatr;
 
 		iFstr.read( buf, BUF_SIZE );
 		length -= BUF_SIZE;
@@ -212,28 +214,28 @@ public:
 		switch ( header.dataType )
 		{
 		case INT:
-			m_undefMatr = new matrix<int>( header.height, header.width );
+			undefMatr = new matrix<int>( header.height, header.width );
 			break;
 		case LONG:
-			m_undefMatr = new matrix<long>( header.height, header.width );
+			undefMatr = new matrix<long>( header.height, header.width );
 			break;
 		case FLOAT:
-			m_undefMatr = new matrix<float>( header.height, header.width );
+			undefMatr = new matrix<float>( header.height, header.width );
 			break;
 		case DOUBLE:
-			m_undefMatr = new matrix<double>( header.height, header.width );
+			undefMatr = new matrix<double>( header.height, header.width );
 			break;
 		case COMPLEX_INT:
-			m_undefMatr = new matrix< std::complex<int> >( header.height, header.width );
+			undefMatr = new matrix< std::complex<int> >( header.height, header.width );
 			break;
 		case COMPLEX_LONG:
-			m_undefMatr = new matrix< std::complex<long> >( header.height, header.width );
+			undefMatr = new matrix< std::complex<long> >( header.height, header.width );
 			break;
 		case COMPLEX_FLOAT:
-			m_undefMatr = new matrix< std::complex<float> >( header.height, header.width );
+			undefMatr = new matrix< std::complex<float> >( header.height, header.width );
 			break;
 		case COMPLEX_DOUBLE:
-			m_undefMatr = new matrix< std::complex<double> >( header.height, header.width );
+			undefMatr = new matrix< std::complex<double> >( header.height, header.width );
 			break;
 		case UNDEFINED_DATA_TYPE:
 			onExit( iFstr );
@@ -253,37 +255,37 @@ public:
 			switch ( header.dataType )
 			{
 			case INT:
-				deserializeStep( buf, size, *( (matrix<int>*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix<int>*)undefMatr ) ); 
 				break;
 			case LONG:
-				deserializeStep( buf, size, *( (matrix<long>*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix<long>*)undefMatr ) ); 
 				break;
 			case FLOAT:
-				deserializeStep( buf, size, *( (matrix<float>*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix<float>*)undefMatr ) ); 
 				break;
 			case DOUBLE:
-				deserializeStep( buf, size, *( (matrix<double>*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix<double>*)undefMatr ) ); 
 				break;
 			case COMPLEX_INT:
-				deserializeStep( buf, size, *( (matrix< std::complex<int> >*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix< std::complex<int> >*)undefMatr ) ); 
 				break;
 			case COMPLEX_LONG:
-				deserializeStep( buf, size, *( (matrix< std::complex<long> >*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix< std::complex<long> >*)undefMatr ) ); 
 				break;
 			case COMPLEX_FLOAT:
-				deserializeStep( buf, size, *( (matrix< std::complex<float> >*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix< std::complex<float> >*)undefMatr ) ); 
 				break;
 			case COMPLEX_DOUBLE:
-				deserializeStep( buf, size, *( (matrix< std::complex<double> >*)m_undefMatr ) ); 
+				deserializeStep( buf, size, *( (matrix< std::complex<double> >*)undefMatr ) ); 
 				break;
 			case UNDEFINED_DATA_TYPE:
-				delete m_undefMatr;
-				m_undefMatr = 0;
+				delete undefMatr;
+				undefMatr = 0;
 				onExit( iFstr );
 				return 0;				
 			default:
-				delete m_undefMatr;
-				m_undefMatr = 0;
+				delete undefMatr;
+				undefMatr = 0;
 				onExit( iFstr );
 				return 0;	
 			}
@@ -291,7 +293,7 @@ public:
 		deserializeStop();
 
 		onExit( iFstr );
-		return m_undefMatr;
+		return undefMatr;
 	}
 
 private:
@@ -299,8 +301,6 @@ private:
     size_t m_bufSize;
     size_t m_dataSize;
     size_t m_pos;
-
-	void* m_undefMatr;
 };
 
 //--------------------------------------------------------------
