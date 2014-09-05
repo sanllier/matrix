@@ -62,6 +62,87 @@ public:
         matr.strongCopy( temp );
     }
 
+    static matrix<T>* mul( const matrix<T>& matA, const matrix<T>& matB )
+    {
+        if ( matA.width() != matB.height() )
+            return 0;
+
+        matrix<T>* temp = new matrix<T>( matA.height(), matB.width() );
+        T acc = T();
+        for ( long i = 0; i < matA.height(); ++i )
+        {
+            for ( long q = 0; q < matB.width(); ++q )
+            {
+                for ( long k = 0; k < matA.width(); ++k )
+                    acc += matA.at( i, k ) * matB.at( k, q );
+ 
+                temp->at( i, q ) = acc;
+                acc = T();
+            }
+        }
+        return temp;
+    }
+
+    static matrix<T>* mulx( const matrix<T>& matA, const matrix<T>& matB, T frac )
+    {
+        if ( matA.width() != matB.height() )
+            return 0;
+
+        matrix<T>* temp = new matrix<T>( matA.height(), matB.width() );
+        T acc = T();
+        for ( long i = 0; i < matA.height(); ++i )
+        {
+            for ( long q = 0; q < matB.width(); ++q )
+            {
+                for ( long k = 0; k < matA.width(); ++k )
+                    acc += matA.at( i, k ) * matB.at( k, q ) * frac;
+ 
+                temp->at( i, q ) = acc;
+                acc = T();
+            }
+        }
+        return temp;
+    }
+
+    static matrix<T>* mulc( const matrix<T>& matA, T frac )
+    {
+        if ( matA.width() != matB.width() || matA.height() != matB.height() )
+            return 0;
+
+        matrix<T>* temp = new matrix<T>( matA.height(), matB.width() );
+        for ( long i = 0; i < matA.height(); ++i )
+            for ( long q = 0; q < matA.width(); ++q )
+                temp->at( i, q ) = matA.at( i, q ) * frac;
+
+        return temp;
+    }
+
+    static matrix<T>* sum( const matrix<T>& matA, const matrix<T>& matB )
+    {
+        if ( matA.width() != matB.width() || matA.height() != matB.height() )
+            return 0;
+
+        matrix<T>* temp = new matrix<T>( matA.height(), matB.width() );
+        for ( long i = 0; i < matA.height(); ++i )
+            for ( long q = 0; q < matA.width(); ++q )
+                temp->at( i, q ) = matA.at( i, q ) + matB.at( i, q );
+
+        return temp;
+    }
+
+    static matrix<T>* sub( const matrix<T>& matA, const matrix<T>& matB )
+    {
+        if ( matA.width() != matB.width() || matA.height() != matB.height() )
+            return 0;
+
+        matrix<T>* temp = new matrix<T>( matA.height(), matB.width() );
+        for ( long i = 0; i < matA.height(); ++i )
+            for ( long q = 0; q < matA.width(); ++q )
+                temp->at( i, q ) = matA.at( i, q ) - matB.at( i, q );
+
+        return temp;
+    }
+
 	// CRAP
     /*static void blockMul( matrix<T>& matrA, matrix<T>& matrB, long blockSize )
     {
